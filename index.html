@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funding Attack Planner v35 — Trading con FilosofÍA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --gold:#c9a227;
+  --gold-light:#f5d06a;
+  --gold-dim:#7a5f10;
+  --navy:#050c1a;
+  --navy2:#0a1428;
+  --navy3:#0f1e38;
+  --navy4:#162444;
+  --blue-line:#1e3a6e;
+  --text:#e8eaf0;
+  --text-muted:#6b7fa3;
+  --text-dim:#3d5080;
+  --green:#1aad75;
+  --green-bg:#0a2a1c;
+  --red:#e24b4a;
+  --red-bg:#2a0a0a;
+  --amber:#e5982a;
+  --amber-bg:#2a1a05;
+  --card-bg:#0d1b30;
+  --card-border:#1a2d50;
+  --input-bg:#070e1d;
+  --radius:10px;
+  --radius-sm:6px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{
+  background:var(--navy);
+  color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+
+/* ─── HEADER ─── */
+.site-header{
+  background:var(--navy2);
+  border-bottom:1px solid var(--blue-line);
+  padding:0 2rem;
+  display:flex;
+  align-items:center;
+  gap:1.5rem;
+  height:64px;
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  display:flex;align-items:center;gap:12px;text-decoration:none;
+}
+.logo-mark{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;
+  font-size:13px;font-weight:700;
+  color:var(--navy);letter-spacing:-0.5px;
+  flex-shrink:0;
+}
+.logo-name{
+  display:flex;flex-direction:column;
+}
+.logo-name span:first-child{
+  font-size:14px;font-weight:600;color:var(--text);letter-spacing:0.2px;
+}
+.logo-name span:last-child{
+  font-size:11px;color:var(--text-muted);font-weight:400;
+}
+.header-spacer{flex:1}
+.yt-link{
+  display:flex;align-items:center;gap:8px;
+  background:#ff0000;
+  color:#fff;
+  text-decoration:none;
+  padding:7px 14px;border-radius:var(--radius-sm);
+  font-size:12px;font-weight:600;
+  letter-spacing:0.3px;
+  transition:opacity .15s;
+}
+.yt-link:hover{opacity:.85}
+.yt-link svg{width:16px;height:16px;fill:#fff}
+.version-badge{
+  background:var(--navy3);
+  border:1px solid var(--blue-line);
+  color:var(--text-muted);
+  font-size:11px;padding:4px 10px;border-radius:999px;
+  font-family:'Space Mono',monospace;
+}
+
+/* ─── MAIN ─── */
+.main{
+  max-width:1440px;
+  margin:0 auto;
+  padding:2rem 2rem 4rem;
+  display:grid;
+  grid-template-columns:420px 1fr;
+  gap:1.5rem;
+  align-items:start;
+}
+
+/* ─── HERO STRIP ─── */
+.hero-strip{
+  grid-column:1/-1;
+  background:var(--navy2);
+  border:1px solid var(--blue-line);
+  border-radius:var(--radius);
+  padding:1.5rem 2rem;
+  display:flex;align-items:center;gap:2rem;
+}
+.hero-title{
+  flex:1;
+}
+.hero-title h1{
+  font-size:24px;font-weight:700;color:var(--gold-light);letter-spacing:-0.5px;
+}
+.hero-title p{
+  font-size:13px;color:var(--text-muted);margin-top:4px;
+}
+.hero-stats{
+  display:flex;gap:2rem;
+}
+.hero-stat{
+  text-align:center;
+}
+.hero-stat-val{
+  font-size:20px;font-weight:700;color:var(--gold);
+  font-family:'Space Mono',monospace;
+}
+.hero-stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+/* ─── PANEL / CARD ─── */
+.panel{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:1.25rem;
+}
+.panel-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;
+  color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.8px;
+  margin-bottom:1rem;
+  padding-bottom:.75rem;
+  border-bottom:1px solid var(--card-border);
+}
+.panel-title svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ─── TABS ─── */
+.tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--navy);border-radius:var(--radius-sm);padding:4px;}
+.tab-btn{
+  flex:1;padding:7px 10px;border:none;
+  background:transparent;color:var(--text-muted);
+  font-size:12px;font-weight:500;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all .15s;font-family:inherit;
+  white-space:nowrap;
+}
+.tab-btn.active{background:var(--card-bg);color:var(--gold);border:1px solid var(--card-border);}
+
+/* ─── FIELDS ─── */
+.field{margin-bottom:.85rem}
+.field label{
+  display:block;font-size:11px;font-weight:500;
+  color:var(--text-muted);margin-bottom:5px;letter-spacing:0.2px;
+}
+.field input[type=text],.field input[type=number]{
+  width:100%;
+  background:var(--input-bg);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-size:13px;font-family:'Space Mono',monospace;
+  padding:8px 10px;
+  transition:border-color .15s;
+}
+.field input:focus{outline:none;border-color:var(--gold-dim);}
+.field-hint{font-size:10px;color:var(--text-dim);margin-top:3px;line-height:1.4;}
+.checkbox-row{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:.5rem 0;font-size:12px;color:var(--text-muted);line-height:1.4;
+}
+.checkbox-row input{margin-top:2px;accent-color:var(--gold);}
+
+/* ─── MODEL GRID ─── */
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.model-card{
+  background:var(--navy);border:1px solid var(--blue-line);
+  border-radius:var(--radius-sm);padding:10px;
+}
+.model-label{
+  font-size:11px;font-weight:700;color:var(--gold);
+  margin-bottom:8px;font-family:'Space Mono',monospace;letter-spacing:0.5px;
+}
+
+/* ─── SEPARATOR ─── */
+.sep-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:700;color:var(--gold-dim);
+  text-transform:uppercase;letter-spacing:1px;
+  margin:.75rem 0 .5rem;
+}
+.sep-label::after{content:'';flex:1;height:1px;background:var(--card-border);}
+
+/* ─── CALC BUTTON ─── */
+.btn-calc{
+  width:100%;padding:13px;
+  background:var(--gold);color:var(--navy);
+  font-size:14px;font-weight:700;
+  border:none;border-radius:var(--radius);
+  cursor:pointer;margin-top:1rem;
+  font-family:'Space Grotesk',sans-serif;
+  letter-spacing:0.5px;
+  transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-calc:hover{background:var(--gold-light);}
+.btn-calc:disabled{opacity:.4;cursor:default;}
+.btn-calc svg{width:18px;height:18px;stroke:var(--navy);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ─── RESULTS ─── */
+.results-col{display:flex;flex-direction:column;gap:1rem;}
+.result-hidden{display:none!important}
+
+.metric-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-bottom:1rem;
+}
+.metric-card{
+  background:var(--navy);border:1px solid var(--blue-line);
+  border-radius:var(--radius-sm);
+  padding:10px 12px;
+}
+.metric-val{
+  font-size:18px;font-weight:700;
+  font-family:'Space Mono',monospace;
+  color:var(--text);line-height:1;
+}
+.metric-val.gold{color:var(--gold);}
+.metric-val.green{color:var(--green);}
+.metric-val.red{color:var(--red);}
+.metric-lbl{font-size:10px;color:var(--text-muted);margin-top:4px;}
+
+.kv-table{width:100%;border-collapse:collapse;font-size:12px;}
+.kv-table tr{border-bottom:1px solid var(--card-border);}
+.kv-table tr:last-child{border-bottom:none}
+.kv-table td{padding:6px 0;}
+.kv-table td:first-child{color:var(--text-muted);width:50%;}
+.kv-table td:last-child{
+  font-family:'Space Mono',monospace;font-size:11px;
+  color:var(--text);text-align:right;
+}
+
+.life-table,.top-table{
+  width:100%;border-collapse:collapse;
+  font-size:11px;
+}
+.life-table th,.top-table th{
+  text-align:left;padding:5px 8px;
+  font-size:10px;font-weight:600;
+  color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:0.5px;
+  border-bottom:1px solid var(--card-border);
+  white-space:nowrap;
+}
+.life-table td,.top-table td{
+  padding:6px 8px;
+  border-bottom:1px solid var(--navy2);
+  font-size:11px;
+  font-family:'Space Mono',monospace;
+  white-space:nowrap;
+}
+.top-table tr:last-child td{border-bottom:none}
+.top-table tr:hover td{background:var(--navy3);}
+
+.badge{
+  display:inline-block;padding:2px 8px;
+  border-radius:999px;font-size:10px;font-weight:600;
+  font-family:'Space Grotesk',sans-serif;
+}
+.badge-g{background:var(--green-bg);color:var(--green);border:1px solid #1a5a40}
+.badge-a{background:var(--amber-bg);color:var(--amber);border:1px solid #5a3a05}
+.badge-r{background:var(--red-bg);color:var(--red);border:1px solid #5a1010}
+
+.verdict-g{color:var(--green);font-size:10px;}
+.verdict-a{color:var(--amber);font-size:10px;}
+.verdict-r{color:var(--red);font-size:10px;}
+
+.info-band{
+  background:var(--navy2);
+  border-left:3px solid var(--gold);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:10px 14px;
+  font-size:12px;color:var(--text-muted);line-height:1.6;
+  margin-bottom:.75rem;
+}
+.info-band strong{color:var(--text);}
+
+/* ─── FOOTER ─── */
+.site-footer{
+  border-top:1px solid var(--blue-line);
+  padding:1.5rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--text-dim);
+  max-width:1440px;margin:0 auto;
+}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--text-muted);}
+.footer-brand span{color:var(--gold);}
+
+/* ─── SPINNER ─── */
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid var(--navy);border-top-color:transparent;
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── TAB PANELS ─── */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--navy4);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a class="logo" href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
+    <div class="logo-mark">F/A</div>
+    <div class="logo-name">
+      <span>Trading con FilosofÍA</span>
+      <span>ICT · Smart Money · Futuros</span>
+    </div>
+  </a>
+  <div class="header-spacer"></div>
+  <span class="version-badge">v35 Trade-Aware</span>
+  <a class="yt-link" href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
+    YouTube
+  </a>
+</header>
+
+<!-- MAIN -->
+<main>
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero-strip">
+    <div class="hero-title">
+      <h1>Funding Attack Planner</h1>
+      <p>Simulador Monte Carlo para evaluaciones prop trading · Modelos ICT/SMC · Cálculo real de probabilidades LIFE desde cadenas de Markov</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val">3</div><div class="hero-stat-lbl">Modelos LIFE</div></div>
+      <div class="hero-stat"><div class="hero-stat-val" id="statRuns">3.000</div><div class="hero-stat-lbl">Simulaciones</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">NQ·ES·BTC</div><div class="hero-stat-lbl">Instrumentos</div></div>
+    </div>
+  </div>
+
+  <!-- LEFT: CONTROLS -->
+  <div>
+    <div class="panel">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('capital',this)">Capital</button>
+        <button class="tab-btn" onclick="showTab('eval',this)">Evaluación</button>
+        <button class="tab-btn" onclick="showTab('life',this)">LIFE</button>
+        <button class="tab-btn" onclick="showTab('notas',this)">Guía</button>
+      </div>
+
+      <!-- TAB: CAPITAL -->
+      <div id="tab-capital" class="tab-panel active">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 6v6l4 2"/></svg>
+          Presupuesto &amp; ciclo
+        </div>
+        <div class="field"><label>Capital del ciclo ($)</label><input type="text" id="txtCapital" value="10000"><div class="field-hint">Dinero real para comprar evaluaciones durante el ciclo.</div></div>
+        <div class="field"><label>Días del ciclo</label><input type="text" id="txtDiasCiclo" value="30"></div>
+        <div class="field"><label>Coste por evaluación ($)</label><input type="text" id="txtCosteEval" value="80"></div>
+        <div class="field"><label>Máx. canales a probar</label><input type="text" id="txtMaxCanales" value="125"><div class="field-hint">Para $10.000 / $80 usa 125.</div></div>
+        <div class="field"><label>Simulaciones Monte Carlo</label><input type="text" id="txtRuns" value="3000" oninput="document.getElementById('statRuns').textContent=Number(this.value).toLocaleString('es-ES')"></div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="chkSolo" checked>
+          <label for="chkSolo">Solo comprar evaluación si puede terminar dentro del ciclo</label>
+        </div>
+      </div>
+
+      <!-- TAB: EVAL -->
+      <div id="tab-eval" class="tab-panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Parámetros de evaluación
+        </div>
+        <div class="field"><label>Objetivo evaluación ($)</label><input type="text" id="txtObjEval" value="3000"></div>
+        <div class="field"><label>Drawdown evaluación ($)</label><input type="text" id="txtDdEval" value="2000"></div>
+        <div class="field"><label>Probabilidad de pasar (%)</label><input type="text" id="txtProbEval" value="28"></div>
+        <div class="field"><label>Días mínimos de evaluación</label><input type="text" id="txtDiasMin" value="3"></div>
+        <div class="sep-label">Riesgo diario</div>
+        <div class="field"><label>Mínimo ($)</label><input type="text" id="txtRMin" value="50"></div>
+        <div class="field"><label>Máximo ($)</label><input type="text" id="txtRMax" value="1500"></div>
+        <div class="field"><label>Paso ($)</label><input type="text" id="txtRPaso" value="50"></div>
+        <div class="sep-label">Referencia</div>
+        <div class="field"><label>Riesgo de referencia ($)</label><input type="text" id="txtRRef" value="1000"></div>
+        <div class="field"><label>Días para PASAR (ref)</label><input type="text" id="txtDiasPassRef" value="5"></div>
+        <div class="field"><label>Días para FALLAR (ref)</label><input type="text" id="txtDiasFailRef" value="4"></div>
+      </div>
+
+      <!-- TAB: LIFE -->
+      <div id="tab-life" class="tab-panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          LIFE &amp; retiros
+        </div>
+        <div class="field"><label>Payout por retiro ($)</label><input type="text" id="txtPayout" value="1000"></div>
+        <div class="field"><label>Profit necesario 1er retiro ($)</label><input type="text" id="txtObj1" value="2000"><div class="field-hint">Ej: 50.000 → 52.000 = +2.000</div></div>
+        <div class="field"><label>DD disponible 1er retiro ($)</label><input type="text" id="txtDd1" value="2000"></div>
+        <div class="field"><label>Profit retiros posteriores ($)</label><input type="text" id="txtObjN" value="1000"></div>
+        <div class="field"><label>DD disponible posteriores ($)</label><input type="text" id="txtDdN" value="1000"></div>
+        <div class="field"><label>Máx. retiros por LIFE</label><input type="text" id="txtMaxRet" value="12"></div>
+        <div class="field"><label>Días máx. post-ciclo</label><input type="text" id="txtHorizon" value="365"></div>
+
+        <div class="sep-label">Modelos de trading</div>
+        <div class="model-grid">
+          <div class="model-card">
+            <div class="model-label">1:1</div>
+            <div class="field"><label>WR %</label><input type="text" id="txtWr11" value="50"></div>
+            <div class="field"><label>Win $</label><input type="text" id="txtWin11" value="250"></div>
+            <div class="field"><label>Loss $</label><input type="text" id="txtLoss11" value="250"></div>
+          </div>
+          <div class="model-card">
+            <div class="model-label">1:5</div>
+            <div class="field"><label>WR %</label><input type="text" id="txtWr15" value="80"></div>
+            <div class="field"><label>Win $</label><input type="text" id="txtWin15" value="187"></div>
+            <div class="field"><label>Loss $</label><input type="text" id="txtLoss15" value="1000"></div>
+          </div>
+          <div class="model-card">
+            <div class="model-label">1:10</div>
+            <div class="field"><label>WR %</label><input type="text" id="txtWr110" value="87"></div>
+            <div class="field"><label>Win $</label><input type="text" id="txtWin110" value="200"></div>
+            <div class="field"><label>Loss $</label><input type="text" id="txtLoss110" value="2000"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: NOTAS -->
+      <div id="tab-notas" class="tab-panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Cómo leer los resultados
+        </div>
+        <div class="info-band"><strong>v35 Trade-Aware LIFE.</strong> Las probabilidades de retiro se calculan desde winrate + ganancia + pérdida + objetivo + DD usando cadenas de Markov. No introduces probabilidades a mano.</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;display:flex;flex-direction:column;gap:.75rem">
+          <p><strong style="color:var(--text)">Neto/año · Retiros/mes · P10/P50/P90</strong><br>Son las métricas clave, no la probabilidad de primer retiro de forma aislada.</p>
+          <p><strong style="color:var(--text)">P10 / P50 / P90</strong><br>P10 = resultado en el 10% peor de simulaciones. P90 = en el 10% mejor. Un modelo 1:10 con P10 muy negativo tiene alta varianza.</p>
+          <p><strong style="color:var(--text)">Uso de presupuesto ≥ 85%</strong><br>Es señal de ataque eficiente. Si sobra mucho capital, sube canales o riesgo.</p>
+          <p><strong style="color:var(--text)">Defaults</strong><br>1:1 = 50% WR, +250/-250<br>1:5 = 80% WR, +187/-1000<br>1:10 = 87% WR, +200/-2000<br>1er retiro: +2000, DD 2000<br>Posteriores: +1000, DD 1000</p>
+          <p style="padding-top:.5rem;border-top:1px solid var(--card-border)">
+            Más contenido sobre ICT y prop trading en
+            <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;font-weight:600">Trading con FilosofÍA ↗</a>
+          </p>
+        </div>
+      </div>
+
+      <button class="btn-calc" id="btnCalc" onclick="calcular()">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Calcular
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="results-col">
+
+    <!-- PLACEHOLDER -->
+    <div id="placeholder" class="panel" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:1rem;text-align:center">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-muted)">Listo para calcular</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Ajusta los parámetros y pulsa Calcular</div>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--card-border);width:100%">
+        <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:8px;color:var(--gold);text-decoration:none;font-size:12px;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a227"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
+          Trading con FilosofÍA en YouTube
+        </a>
+      </div>
+    </div>
+
+    <!-- RESULTS (hidden until calc) -->
+    <div id="resultsArea" class="result-hidden">
+
+      <!-- BEST CONFIG -->
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Mejor configuración global
+        </div>
+        <div class="metric-grid" id="topMetrics"></div>
+        <table class="kv-table" id="bestTable"></table>
+      </div>
+
+      <!-- LIFE TABLE -->
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Probabilidades LIFE calculadas
+        </div>
+        <div style="overflow-x:auto">
+        <table class="life-table">
+          <thead><tr>
+            <th>Modelo</th><th>WR</th><th>Trade</th>
+            <th>P(1er retiro)</th><th>Días OK/Fail</th>
+            <th>P(posteriores)</th><th>Días OK/Fail</th>
+          </tr></thead>
+          <tbody id="lifeBody"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- TOP TABLE -->
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Top 15 configuraciones
+        </div>
+        <div style="overflow-x:auto">
+        <table class="top-table">
+          <thead><tr>
+            <th>#</th><th>LIFE</th><th>Can.</th><th>Riesgo</th>
+            <th>Uso $</th><th>LIFEs</th><th>Ret/mes</th>
+            <th>Neto</th><th>Neto/año</th><th>P+</th>
+            <th>P10/P50/P90</th><th>Veredicto</th>
+          </tr></thead>
+          <tbody id="topBody"></tbody>
+        </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- FOOTER -->
+<footer style="background:var(--navy2);border-top:1px solid var(--blue-line);padding:1.25rem 2rem;margin-top:2rem">
+  <div style="max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo-mark" style="width:32px;height:32px;font-size:10px;border-radius:7px">F/A</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted)">Trading con <span style="color:var(--gold)">FilosofÍA</span></div>
+        <div style="font-size:10px;color:var(--text-dim)">Funding Attack Planner v35 · Monte Carlo Trade-Aware</div>
+      </div>
+    </div>
+    <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--red)"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
+      youtube.com/@TradingCnFiilo
+    </a>
+  </div>
+</footer>
+
+<script>
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){let t=a%b;a=b;b=t;}return a||1;}
+
+function calcPhase(wr,gain,loss,target,dd){
+  gain=Math.max(1,Math.round(gain));loss=Math.max(1,Math.round(loss));
+  target=Math.max(1,Math.round(target));dd=Math.max(1,Math.round(dd));
+  let g=gcd(gcd(gain,loss),gcd(target,dd));
+  if(g>1){gain=Math.round(gain/g);loss=Math.round(loss/g);target=Math.round(target/g);dd=Math.round(dd/g);}
+  let lo=-dd+1,hi=target-1,n=hi-lo+1;
+  if(n<=0||n>25000)return{ProbSuccess:.5,DaysIfSuccess:5,DaysIfFail:4,DaysToResolve:9};
+  let p=wr,q=1-p;
+  let ps=new Float64Array(n),hs=new Float64Array(n),hf=new Float64Array(n),ha=new Float64Array(n);
+  for(let i=0;i<n;i++){let x=lo+i;ps[i]=Math.max(0,Math.min(1,(x+dd)/(target+dd)));}
+  let si=-lo;
+  function gPs(x){if(x>=target)return 1;if(x<=-dd)return 0;let i=x-lo;return(i>=0&&i<n)?ps[i]:(x+dd)/(target+dd);}
+  function gHa(x){if(x>=target||x<=-dd)return 0;let i=x-lo;return(i>=0&&i<n)?ha[i]:0;}
+  function sC(x){if(x>=target)return 1;if(x<=-dd)return 0;let i=x-lo;return ps[i]+hs[i];}
+  function fC(x){if(x>=target)return 0;if(x<=-dd)return 1;let i=x-lo;return(1-ps[i])+hf[i];}
+  for(let iter=0;iter<15000;iter++){
+    let md=0;
+    for(let i=0;i<n;i++){
+      let x=lo+i,up=x+gain,dn=x-loss;
+      let np=p*gPs(up)+q*gPs(dn);
+      let nhs=p*sC(up)+q*sC(dn);
+      let nhf=p*fC(up)+q*fC(dn);
+      let nha=1+p*gHa(up)+q*gHa(dn);
+      md=Math.max(md,Math.abs(np-ps[i]),Math.abs(nha-ha[i]));
+      ps[i]=np;hs[i]=nhs;hf[i]=nhf;ha[i]=nha;
+    }
+    if(md<1e-11)break;
+  }
+  let pS=Math.max(0,Math.min(1,ps[si])),pF=1-pS;
+  return{ProbSuccess:pS,DaysIfSuccess:pS>0?hs[si]/pS:0,DaysIfFail:pF>0?hf[si]/pF:0,DaysToResolve:ha[si]};
+}
+
+function D(id){
+  let s=(document.getElementById(id)||{}).value||'';
+  let c=s.replace(/[$€%,\s]/g,'').trim();
+  return parseFloat(c)||0;
+}
+function I(id){return Math.round(D(id));}
+function Pct(id){return D(id)/100;}
+function money(v){let s=Math.round(Math.abs(v)).toLocaleString('en-US');return(v<0?'-$':'$')+s;}
+function pctStr(v){return(v*100).toFixed(1)+'%';}
+
+async function calcular(){
+  const btn=document.getElementById('btnCalc');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Calculando...';
+  await new Promise(r=>setTimeout(r,30));
+  try{_calc();}catch(e){alert('Error: '+e.message);}
+  btn.disabled=false;
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg> Calcular';
+}
+
+function _calc(){
+  let capital=D('txtCapital');
+  let diasCiclo=Math.max(1,I('txtDiasCiclo'));
+  let coste=D('txtCosteEval');
+  let maxCan=Math.max(1,I('txtMaxCanales'));
+  let runs=Math.max(200,I('txtRuns'));
+  let soloT=document.getElementById('chkSolo').checked;
+  let probEval=Pct('txtProbEval');
+  let diasMin=Math.max(1,I('txtDiasMin'));
+  let rMin=D('txtRMin'),rMax=D('txtRMax'),rPaso=D('txtRPaso');
+  let rRef=D('txtRRef');
+  let diasPassRef=D('txtDiasPassRef');
+  let diasFailRef=D('txtDiasFailRef');
+  let payout=D('txtPayout');
+  let obj1=D('txtObj1'),dd1=D('txtDd1');
+  let objN=D('txtObjN'),ddN=D('txtDdN');
+  let maxRet=Math.max(1,I('txtMaxRet'));
+  let horizon=Math.max(30,I('txtHorizon'));
+
+  let maxEvals=Math.floor(capital/coste);
+  maxCan=Math.min(maxCan,Math.max(1,maxEvals));
+
+  let models=[
+    {name:'1:1',wr:Pct('txtWr11'),win:D('txtWin11'),loss:D('txtLoss11')},
+    {name:'1:5',wr:Pct('txtWr15'),win:D('txtWin15'),loss:D('txtLoss15')},
+    {name:'1:10',wr:Pct('txtWr110'),win:D('txtWin110'),loss:D('txtLoss110')},
+  ];
+  for(let m of models){
+    m.first=calcPhase(m.wr,m.win,m.loss,obj1,dd1);
+    m.later=calcPhase(m.wr,m.win,m.loss,objN,ddN);
+  }
+
+  let rSet=new Set();
+  for(let r=rMin;r<=rMax+.001;r+=rPaso)rSet.add(Math.round(r*100)/100);
+  [25,50,75,100,125,150,187,200,250,300,400,500,600,750,1000,1500].forEach(e=>{if(e>=rMin&&e<=rMax)rSet.add(e);});
+  let rArr=Array.from(rSet).sort((a,b)=>a-b);
+
+  let results=[];
+  let seed0=20260613;
+  function lcg(s){return(s*1664525+1013904223)&0xffffffff;}
+  function rng(s){return((s>>>0)/0x100000000);}
+
+  for(let riesgo of rArr){
+    let dPD=diasPassRef*(rRef/riesgo),dFD=diasFailRef*(rRef/riesgo);
+    let dP=Math.max(diasMin,Math.ceil(dPD)),dF=Math.max(diasMin,Math.ceil(dFD));
+    if(soloT&&Math.max(dP,dF)>diasCiclo)continue;
+    for(let can=1;can<=maxCan;can++){
+      for(let m of models){
+        let s0=seed0+(results.length*104729)+(can*8191)+Math.round(riesgo*17);
+        let r=sim(capital,diasCiclo,coste,can,probEval,dP,dF,payout,maxRet,horizon,m,soloT,runs,s0,lcg,rng);
+        r.life=m;r.canales=can;r.riesgo=riesgo;r.dP=dP;r.dF=dF;
+        r.usedPct=capital>0?Math.min(1,r.costeMed/capital):0;
+        r.netoAnual=r.finishMed>0?r.netoMed/r.finishMed*365:0;
+        r.retMes=r.finishMed>0?r.retMed/r.finishMed*30:0;
+        scoreR(r);results.push(r);
+      }
+    }
+  }
+
+  results.sort((a,b)=>b.sc-a.sc||b.netoAnual-a.netoAnual||b.retMes-a.retMes||b.usedPct-a.usedPct);
+  render(results,models,maxEvals);
+}
+
+function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizon,model,soloT,runs,seedBase,lcg,rng){
+  let tE=0,tC=0,tL=0,tR=0,tPay=0,tNet=0,tFin=0;
+  let nProfit=0;let nets=[];
+  let totalH=diasCiclo+horizon,durMax=Math.max(dP,dF);
+  for(let run=0;run<runs;run++){
+    let s=seedBase+run*7919;
+    function nx(){s=lcg(s);return rng(s);}
+    let cash=capital,cs=0,pays=0,evals=0,lifes=0,rets=0,fin=0;
+    let chEnd=new Int32Array(canales).fill(-1),chPass=new Uint8Array(canales);
+    let lED=[],lAtt=[],lWS=[];let nL=0;
+    function addL(att,day){
+      let st=att===1?model.first:model.later;
+      let succ=nx()<st.ProbSuccess;
+      let d=Math.max(1,Math.ceil(succ?st.DaysIfSuccess:st.DaysIfFail));
+      lED.push(day+d);lAtt.push(att);lWS.push(succ);nL++;
+    }
+    for(let day=0;day<=totalH;day++){
+      for(let i=0;i<canales;i++){
+        if(chEnd[i]>=0&&chEnd[i]<=day){
+          if(chPass[i]){lifes++;addL(1,day);}
+          chEnd[i]=-1;
+        }
+      }
+      for(let i=nL-1;i>=0;i--){
+        if(lED[i]>day)continue;
+        if(!lWS[i]){lED.splice(i,1);lAtt.splice(i,1);lWS.splice(i,1);nL--;continue;}
+        rets++;pays+=payout;
+        let att=lAtt[i];
+        lED.splice(i,1);lAtt.splice(i,1);lWS.splice(i,1);nL--;
+        if(att<maxRet)addL(att+1,day);
+      }
+      if(day<diasCiclo&&cash>=coste){
+        let canBuy=!soloT||day+durMax<=diasCiclo;
+        if(canBuy){
+          for(let i=0;i<canales&&cash>=coste;i++){
+            if(chEnd[i]>=0)continue;
+            cash-=coste;cs+=coste;evals++;
+            let pass=nx()<probEval;
+            chEnd[i]=day+(pass?dP:dF);chPass[i]=pass?1:0;
+          }
+        }
+      }
+      let idle=true;for(let i=0;i<canales;i++)if(chEnd[i]>=0){idle=false;break;}
+      if(day>diasCiclo&&idle&&nL===0){fin=day;break;}
+      fin=day;
+    }
+    let net=pays-cs;
+    nets.push(net);
+    tE+=evals;tC+=cs;tL+=lifes;tR+=rets;tPay+=pays;tNet+=net;tFin+=fin;
+    if(net>0)nProfit++;
+  }
+  nets.sort((a,b)=>a-b);let n=runs;
+  return{
+    evalsMed:tE/n,costeMed:tC/n,lifesMed:tL/n,retMed:tR/n,
+    paysMed:tPay/n,netoMed:tNet/n,finishMed:tFin/n,
+    probProfit:nProfit/n,
+    p10:nets[Math.round((n-1)*.1)],
+    p50:nets[Math.round((n-1)*.5)],
+    p90:nets[Math.round((n-1)*.9)]
+  };
+}
+
+function scoreR(r){
+  let u=1-r.usedPct;
+  let s=r.usedPct*3500+r.lifesMed*250+r.probProfit*1200+r.netoMed*.1+r.netoAnual*.04+r.retMes*350-u*u*3000-r.canales*6-r.riesgo*.03;
+  if(r.usedPct<.8)s-=1500;
+  r.sc=s;
+  if(r.usedPct<.75)r.verdict='SUBIR canales/riesgo';
+  else if(r.probProfit<.35)r.verdict='Débil en rentabilidad';
+  else if(r.retMes>=1&&r.probProfit>=.45)r.verdict='Ataque eficiente ✓';
+  else r.verdict='Correcto — revisar P10/P90';
+}
+
+function vc(v){if(v.includes('✓'))return 'verdict-g';if(v.includes('Correcto'))return 'verdict-a';return 'verdict-r';}
+
+function render(results,models,maxEvals){
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('resultsArea').classList.remove('result-hidden');
+  let best=results[0];
+
+  document.getElementById('topMetrics').innerHTML=`
+    <div class="metric-card"><div class="metric-val gold">${best.life.name}</div><div class="metric-lbl">Mejor modelo</div></div>
+    <div class="metric-card"><div class="metric-val ${best.netoMed>=0?'green':'red'}">${money(best.netoMed)}</div><div class="metric-lbl">Neto medio</div></div>
+    <div class="metric-card"><div class="metric-val ${best.netoAnual>=0?'green':'red'}">${money(best.netoAnual)}</div><div class="metric-lbl">Neto/año</div></div>
+    <div class="metric-card"><div class="metric-val">${best.retMes.toFixed(2)}</div><div class="metric-lbl">Retiros/mes</div></div>
+    <div class="metric-card"><div class="metric-val ${best.probProfit>=.5?'green':'red'}">${pctStr(best.probProfit)}</div><div class="metric-lbl">Prob. positivo</div></div>
+    <div class="metric-card"><div class="metric-val">${best.canales}</div><div class="metric-lbl">Canales</div></div>
+    <div class="metric-card"><div class="metric-val">${money(best.riesgo)}</div><div class="metric-lbl">Riesgo/día</div></div>
+    <div class="metric-card"><div class="metric-val ${best.usedPct>=.85?'green':'red'}">${pctStr(best.usedPct)}</div><div class="metric-lbl">Uso presupuesto</div></div>
+  `;
+
+  document.getElementById('bestTable').innerHTML=`
+    <tr><td>Modelo LIFE</td><td>${best.life.name}</td></tr>
+    <tr><td>Winrate / Trade</td><td>${pctStr(best.life.wr)} &nbsp; +${money(best.life.win)} / -${money(best.life.loss)}</td></tr>
+    <tr><td>P(1er retiro)</td><td>${pctStr(best.life.first.ProbSuccess)} — días OK ${best.life.first.DaysIfSuccess.toFixed(1)}</td></tr>
+    <tr><td>P(posteriores)</td><td>${pctStr(best.life.later.ProbSuccess)} — días OK ${best.life.later.DaysIfSuccess.toFixed(1)}</td></tr>
+    <tr><td>Días eval pasa / falla</td><td>${best.dP} / ${best.dF}</td></tr>
+    <tr><td>Evaluaciones compradas</td><td>${best.evalsMed.toFixed(1)} de ${maxEvals}</td></tr>
+    <tr><td>LIFEs esperadas</td><td>${best.lifesMed.toFixed(1)}</td></tr>
+    <tr><td>Retiros esperados</td><td>${best.retMed.toFixed(1)} (${best.retMes.toFixed(2)}/mes)</td></tr>
+    <tr><td>Payouts esperados</td><td>${money(best.paysMed)}</td></tr>
+    <tr><td>P10 / P50 / P90</td><td>${money(best.p10)} / ${money(best.p50)} / ${money(best.p90)}</td></tr>
+    <tr><td>Veredicto</td><td class="${vc(best.verdict)}">${best.verdict}</td></tr>
+  `;
+
+  document.getElementById('lifeBody').innerHTML=models.map(m=>`
+    <tr>
+      <td style="color:var(--gold);font-weight:700">${m.name}</td>
+      <td>${pctStr(m.wr)}</td>
+      <td>+${money(m.win)} / -${money(m.loss)}</td>
+      <td>${pctStr(m.first.ProbSuccess)}</td>
+      <td>${m.first.DaysIfSuccess.toFixed(1)} / ${m.first.DaysIfFail.toFixed(1)}</td>
+      <td>${pctStr(m.later.ProbSuccess)}</td>
+      <td>${m.later.DaysIfSuccess.toFixed(1)} / ${m.later.DaysIfFail.toFixed(1)}</td>
+    </tr>`).join('');
+
+  document.getElementById('topBody').innerHTML=results.slice(0,15).map((r,i)=>{
+    let bc=r.netoAnual>=0&&r.usedPct>=.85?'badge-g':(r.usedPct>=.75?'badge-a':'badge-r');
+    return`<tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td style="color:var(--gold);font-weight:700">${r.life.name}</td>
+      <td>${r.canales}</td>
+      <td>${money(r.riesgo)}</td>
+      <td><span class="badge ${bc}">${pctStr(r.usedPct)}</span></td>
+      <td>${r.lifesMed.toFixed(1)}</td>
+      <td>${r.retMes.toFixed(2)}</td>
+      <td style="color:${r.netoMed>=0?'var(--green)':'var(--red)'}">${money(r.netoMed)}</td>
+      <td style="color:${r.netoAnual>=0?'var(--green)':'var(--red)'}">${money(r.netoAnual)}</td>
+      <td>${pctStr(r.probProfit)}</td>
+      <td style="font-size:10px">${money(r.p10)}/${money(r.p50)}/${money(r.p90)}</td>
+      <td class="${vc(r.verdict)}">${r.verdict}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('resultsArea').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
