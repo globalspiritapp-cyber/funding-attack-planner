@@ -741,8 +741,8 @@ function _calc(){
 }
 
 function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizon,model,soloT,runs,seedBase,lcg,rng){
-  let tE=0,tC=0,tL=0,tR=0,tPay=0,tNet=0,tFin=0;
-  let nProfit=0;let nets=[];
+  let tE=0,tC=0,tL=0,tR=0,tPay=0,tNet=0,tFin=0,tFPD=0;
+  let nProfit=0,nFPD=0;let nets=[];
   // drawdown tracking
   let ddVals=[]; // max drawdown por run (pico-valle en curva de equity diaria)
   let rachaVals=[]; // días consecutivos en negativo respecto al pico
@@ -750,7 +750,7 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
   for(let run=0;run<runs;run++){
     let s=seedBase+run*7919;
     function nx(){s=lcg(s);return rng(s);}
-    let cash=capital,cs=0,pays=0,evals=0,lifes=0,rets=0,fin=0;
+    let cash=capital,cs=0,pays=0,evals=0,lifes=0,rets=0,fin=0,fpd=-1;
     let chEnd=new Int32Array(canales).fill(-1),chPass=new Uint8Array(canales);
     let lED=[],lAtt=[],lWS=[];let nL=0;
     // equity curve para calcular DD
@@ -773,6 +773,7 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
         if(lED[i]>day)continue;
         if(!lWS[i]){lED.splice(i,1);lAtt.splice(i,1);lWS.splice(i,1);nL--;continue;}
         rets++;pays+=payout;
+        if(fpd<0) fpd=day; // primer retiro del sistema en este run
         let att=lAtt[i];
         lED.splice(i,1);lAtt.splice(i,1);lWS.splice(i,1);nL--;
         if(att<maxRet)addL(att+1,day);
@@ -807,6 +808,7 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
     rachaVals.push(maxRacha);
     tE+=evals;tC+=cs;tL+=lifes;tR+=rets;tPay+=pays;tNet+=net;tFin+=fin;
     if(net>0)nProfit++;
+    if(fpd>=0){nFPD++;tFPD+=fpd;}
   }
   nets.sort((a,b)=>a-b);
   ddVals.sort((a,b)=>a-b);
@@ -825,7 +827,9 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
     p10:nets[Math.round((n-1)*.1)],
     p50:nets[Math.round((n-1)*.5)],
     p90:nets[Math.round((n-1)*.9)],
-    ddMed, ddP50, ddP90, rachaMed, rachaP90
+    ddMed, ddP50, ddP90, rachaMed, rachaP90,
+    firstPayoutDayMed: nFPD>0 ? tFPD/nFPD : 0,
+    probFirstPayout: nFPD/runs
   };
 }
 
@@ -859,8 +863,8 @@ function render(results,models,maxEvals,payout,capital){
   document.getElementById('resultsArea').classList.remove('result-hidden');
   let best=results[0];
 
-  // Días medios hasta primer retiro = días eval pasa + días primer retiro OK
-  let diasPrimerRetiro = best.dP + best.life.first.DaysIfSuccess;
+  // Días hasta 1er retiro del SISTEMA sacado directamente del Monte Carlo
+  let diasPrimerRetiro = best.firstPayoutDayMed > 0 ? best.firstPayoutDayMed : (best.dP + best.life.first.DaysIfSuccess);
   let py = proyAnual(best, payout);
 
   document.getElementById('topMetrics').innerHTML=`
@@ -918,7 +922,8 @@ function render(results,models,maxEvals,payout,capital){
     <tr><td>Modelo LIFE</td><td>${best.life.name}</td></tr>
     <tr><td>Winrate / Trade</td><td>${pctStr(best.life.wr)} &nbsp; +${money(best.life.win)} / -${money(best.life.loss)}</td></tr>
     <tr><td>P(1er retiro)</td><td style="color:var(--green)">${pctStr(best.life.first.ProbSuccess)}</td></tr>
-    <tr><td>Días hasta 1er retiro (si pasa)</td><td style="color:var(--gold)">${diasPrimerRetiro.toFixed(1)} días (eval ${best.dP}d + LIFE ${best.life.first.DaysIfSuccess.toFixed(1)}d)</td></tr>
+    <tr><td>Días hasta 1er retiro (sistema)</td><td style="color:var(--gold)">${diasPrimerRetiro.toFixed(1)} días · prob ${pctStr(best.probFirstPayout)}</td></tr>
+    <tr><td>Días 1er retiro (1 LIFE sola)</td><td style="color:var(--text-muted)">${(best.dP + best.life.first.DaysIfSuccess).toFixed(1)} días (eval ${best.dP}d + LIFE ${best.life.first.DaysIfSuccess.toFixed(1)}d)</td></tr>
     <tr><td>Días si falla 1er retiro</td><td style="color:var(--amber)">${(best.dP + best.life.first.DaysIfFail).toFixed(1)} días</td></tr>
     <tr><td>P(retiros posteriores)</td><td>${pctStr(best.life.later.ProbSuccess)} — días OK ${best.life.later.DaysIfSuccess.toFixed(1)}</td></tr>
     <tr><td>Canales / Riesgo/día</td><td>${best.canales} canales · ${money(best.riesgo)}</td></tr>
