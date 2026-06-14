@@ -190,7 +190,7 @@ body{
 .checkbox-row input{margin-top:2px;accent-color:var(--gold);}
 
 /* ─── MODEL GRID ─── */
-.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.model-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .model-card{
   background:var(--navy);border:1px solid var(--blue-line);
   border-radius:var(--radius-sm);padding:10px;
@@ -337,7 +337,7 @@ body{
 
 <!-- HEADER -->
 <header class="site-header">
-  <a class="logo" href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
+  <a class="logo" href="https://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
     <div class="logo-mark">F/A</div>
     <div class="logo-name">
       <span>Trading con FilosofÍA</span>
@@ -346,7 +346,7 @@ body{
   </a>
   <div class="header-spacer"></div>
   <span class="version-badge">v35 Trade-Aware</span>
-  <a class="yt-link" href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
+  <a class="yt-link" href="https://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener">
     <svg viewBox="0 0 24 24"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
     YouTube
   </a>
@@ -363,7 +363,7 @@ body{
       <p>Simulador Monte Carlo para evaluaciones prop trading · Modelos ICT/SMC · Cálculo real de probabilidades LIFE desde cadenas de Markov</p>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-val">3</div><div class="hero-stat-lbl">Modelos LIFE</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">4</div><div class="hero-stat-lbl">Modelos LIFE</div></div>
       <div class="hero-stat"><div class="hero-stat-val" id="statRuns">3.000</div><div class="hero-stat-lbl">Simulaciones</div></div>
       <div class="hero-stat"><div class="hero-stat-val">NQ·ES·BTC</div><div class="hero-stat-lbl">Instrumentos</div></div>
     </div>
@@ -439,6 +439,12 @@ body{
             <div class="field"><label>Loss $</label><input type="text" id="txtLoss11" value="250"></div>
           </div>
           <div class="model-card">
+            <div class="model-label">1:2</div>
+            <div class="field"><label>WR %</label><input type="text" id="txtWr12" value="67"></div>
+            <div class="field"><label>Win $</label><input type="text" id="txtWin12" value="250"></div>
+            <div class="field"><label>Loss $</label><input type="text" id="txtLoss12" value="500"></div>
+          </div>
+          <div class="model-card">
             <div class="model-label">1:5</div>
             <div class="field"><label>WR %</label><input type="text" id="txtWr15" value="80"></div>
             <div class="field"><label>Win $</label><input type="text" id="txtWin15" value="187"></div>
@@ -464,10 +470,10 @@ body{
           <p><strong style="color:var(--text)">Neto/año · Retiros/mes · P10/P50/P90</strong><br>Son las métricas clave, no la probabilidad de primer retiro de forma aislada.</p>
           <p><strong style="color:var(--text)">P10 / P50 / P90</strong><br>P10 = resultado en el 10% peor de simulaciones. P90 = en el 10% mejor. Un modelo 1:10 con P10 muy negativo tiene alta varianza.</p>
           <p><strong style="color:var(--text)">Uso de presupuesto ≥ 85%</strong><br>Es señal de ataque eficiente. Si sobra mucho capital, sube canales o riesgo.</p>
-          <p><strong style="color:var(--text)">Defaults</strong><br>1:1 = 50% WR, +250/-250<br>1:5 = 80% WR, +187/-1000<br>1:10 = 87% WR, +200/-2000<br>1er retiro: +2000, DD 2000<br>Posteriores: +1000, DD 1000</p>
+          <p><strong style="color:var(--text)">Defaults</strong><br>1:1 = 50% WR, +250/-250<br>1:2 = 67% WR, +250/-500<br>1:5 = 80% WR, +187/-1000<br>1:10 = 87% WR, +200/-2000<br>1er retiro: +2000, DD 2000<br>Posteriores: +1000, DD 1000</p>
           <p style="padding-top:.5rem;border-top:1px solid var(--card-border)">
             Más contenido sobre ICT y prop trading en
-            <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;font-weight:600">Trading con FilosofÍA ↗</a>
+            <a href="https://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;font-weight:600">Trading con FilosofÍA ↗</a>
           </p>
         </div>
       </div>
@@ -490,8 +496,7 @@ body{
         <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Ajusta los parámetros y pulsa Calcular</div>
       </div>
       <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--card-border);width:100%">
-        <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener"
-           style="display:inline-flex;align-items:center;gap:8px;color:var(--gold);text-decoration:none;font-size:12px;font-weight:600;">
+        <a href="https://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;color:var(--gold);text-decoration:none;font-size:12px;font-weight:600;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a227"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
           Trading con FilosofÍA en YouTube
         </a>
@@ -607,8 +612,7 @@ body{
         <div style="font-size:10px;color:var(--text-dim)">Funding Attack Planner v35 · Monte Carlo Trade-Aware</div>
       </div>
     </div>
-    <a href="http://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none">
+    <a href="https://www.youtube.com/@TradingCnFiilo" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--red)"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.2 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 14.5v-5l5.5 2.5L10 14.5z"/></svg>
       youtube.com/@TradingCnFiilo
     </a>
@@ -701,6 +705,7 @@ function _calc(){
 
   let models=[
     {name:'1:1',wr:Pct('txtWr11'),win:D('txtWin11'),loss:D('txtLoss11')},
+    {name:'1:2',wr:Pct('txtWr12'),win:D('txtWin12'),loss:D('txtLoss12')},
     {name:'1:5',wr:Pct('txtWr15'),win:D('txtWin15'),loss:D('txtLoss15')},
     {name:'1:10',wr:Pct('txtWr110'),win:D('txtWin110'),loss:D('txtLoss110')},
   ];
