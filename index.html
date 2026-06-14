@@ -529,6 +529,47 @@ body{
         </div>
       </div>
 
+      <!-- DD / RIESGO DEL SISTEMA -->
+      <div class="panel" id="ddPanel" style="display:none">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Drawdown del sistema — cuánto puedes perder antes de recuperar
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem" id="ddMetrics"></div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6">
+          <strong style="color:var(--text)">DD pico→valle:</strong> diferencia entre el punto más alto de tu curva de equity y el punto más bajo antes de recuperar.<br>
+          <strong style="color:var(--text)">Días en DD:</strong> cuántos días consecutivos estás por debajo de tu máximo anterior.<br>
+          <strong style="color:var(--text)">Ratio neto/DD &gt; 1:</strong> ganas más de lo que puedes perder en el peor tramo — sistema viable. Si es &lt; 1, el DD supera el beneficio esperado.
+        </div>
+      </div>
+
+      <!-- PROYECCIÓN MENSUAL -->
+      <div class="panel" id="proyeccionPanel" style="display:none">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Proyección mensual — escenario esperado (mejor config)
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:.75rem">
+          Ingreso esperado = ingresos_brutos × P(ciclo positivo) — cada mes hay un <span id="probCicloLabel" style="color:var(--amber)"></span> de que el ciclo no genere nada.
+          P10 = escenario pesimista · Medio = esperanza matemática · P90 = escenario optimista.
+          "P(todos positivos)" = probabilidad de que todos los meses hasta ese hayan sido ciclos ganadores.
+        </div>
+        <div style="overflow-x:auto">
+        <table class="top-table">
+          <thead><tr>
+            <th>Mes</th>
+            <th>Ingreso esperado/mes</th>
+            <th>P(ciclo+)</th>
+            <th>Acum. P10 (pesimista)</th>
+            <th>Acum. Medio</th>
+            <th>Acum. P90 (optimista)</th>
+            <th>P(todos positivos)</th>
+          </tr></thead>
+          <tbody id="proyeccionBody"></tbody>
+        </table>
+        </div>
+      </div>
+
       <!-- TOP TABLE -->
       <div class="panel">
         <div class="panel-title">
@@ -540,7 +581,9 @@ body{
           <thead><tr>
             <th>#</th><th>LIFE</th><th>Can.</th><th>Riesgo</th>
             <th>Uso $</th><th>LIFEs</th><th>Ret/mes</th>
+            <th>Días→1er</th>
             <th>Neto</th><th>Neto/año</th><th>P+</th>
+            <th>DD medio</th><th>DD peor</th>
             <th>P10/P50/P90</th><th>Veredicto</th>
           </tr></thead>
           <tbody id="topBody"></tbody>
@@ -694,12 +737,15 @@ function _calc(){
   }
 
   results.sort((a,b)=>b.sc-a.sc||b.netoAnual-a.netoAnual||b.retMes-a.retMes||b.usedPct-a.usedPct);
-  render(results,models,maxEvals);
+  render(results,models,maxEvals,payout,capital);
 }
 
 function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizon,model,soloT,runs,seedBase,lcg,rng){
   let tE=0,tC=0,tL=0,tR=0,tPay=0,tNet=0,tFin=0;
   let nProfit=0;let nets=[];
+  // drawdown tracking
+  let ddVals=[]; // max drawdown por run (pico-valle en curva de equity diaria)
+  let rachaVals=[]; // días consecutivos en negativo respecto al pico
   let totalH=diasCiclo+horizon,durMax=Math.max(dP,dF);
   for(let run=0;run<runs;run++){
     let s=seedBase+run*7919;
@@ -707,6 +753,9 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
     let cash=capital,cs=0,pays=0,evals=0,lifes=0,rets=0,fin=0;
     let chEnd=new Int32Array(canales).fill(-1),chPass=new Uint8Array(canales);
     let lED=[],lAtt=[],lWS=[];let nL=0;
+    // equity curve para calcular DD
+    let pico=0, maxDD=0, diasBajoPico=0, maxRacha=0;
+    function nx(){s=lcg(s);return rng(s);}
     function addL(att,day){
       let st=att===1?model.first:model.later;
       let succ=nx()<st.ProbSuccess;
@@ -739,23 +788,44 @@ function sim(capital,diasCiclo,coste,canales,probEval,dP,dF,payout,maxRet,horizo
           }
         }
       }
+      // equity = pays - cs (neto acumulado en este día)
+      let eq = pays - cs;
+      if(eq > pico) { pico = eq; diasBajoPico = 0; }
+      else {
+        let dd = pico - eq;
+        if(dd > maxDD) maxDD = dd;
+        diasBajoPico++;
+        if(diasBajoPico > maxRacha) maxRacha = diasBajoPico;
+      }
       let idle=true;for(let i=0;i<canales;i++)if(chEnd[i]>=0){idle=false;break;}
       if(day>diasCiclo&&idle&&nL===0){fin=day;break;}
       fin=day;
     }
     let net=pays-cs;
     nets.push(net);
+    ddVals.push(maxDD);
+    rachaVals.push(maxRacha);
     tE+=evals;tC+=cs;tL+=lifes;tR+=rets;tPay+=pays;tNet+=net;tFin+=fin;
     if(net>0)nProfit++;
   }
-  nets.sort((a,b)=>a-b);let n=runs;
+  nets.sort((a,b)=>a-b);
+  ddVals.sort((a,b)=>a-b);
+  rachaVals.sort((a,b)=>a-b);
+  let n=runs;
+  // DD medio, DD peor 10% (P90 del DD = peor caso), racha media y peor
+  let ddMed = ddVals.reduce((a,b)=>a+b,0)/n;
+  let ddP90 = ddVals[Math.round((n-1)*.9)]; // el 10% peor
+  let ddP50 = ddVals[Math.round((n-1)*.5)];
+  let rachaMed = rachaVals.reduce((a,b)=>a+b,0)/n;
+  let rachaP90 = rachaVals[Math.round((n-1)*.9)];
   return{
     evalsMed:tE/n,costeMed:tC/n,lifesMed:tL/n,retMed:tR/n,
     paysMed:tPay/n,netoMed:tNet/n,finishMed:tFin/n,
     probProfit:nProfit/n,
     p10:nets[Math.round((n-1)*.1)],
     p50:nets[Math.round((n-1)*.5)],
-    p90:nets[Math.round((n-1)*.9)]
+    p90:nets[Math.round((n-1)*.9)],
+    ddMed, ddP50, ddP90, rachaMed, rachaP90
   };
 }
 
@@ -772,35 +842,118 @@ function scoreR(r){
 
 function vc(v){if(v.includes('✓'))return 'verdict-g';if(v.includes('Correcto'))return 'verdict-a';return 'verdict-r';}
 
-function render(results,models,maxEvals){
+function proyAnual(r, payout){
+  // Proyección realista: P(retiro) × retiros_mes × payout × 12 — coste ciclo
+  // Cada mes esperado: retMes retiros, cada uno con probabilidad ya embebida en retMed/finishMed
+  let ingresosMes = r.retMes * payout;
+  let costeCicloMes = r.costeMed * (30 / Math.max(1, r.finishMed));
+  let netoMesEsperado = ingresosMes - costeCicloMes;
+  // Proyección pesimista (P10 anualizado) y optimista (P90 anualizado)
+  let p10a = r.finishMed > 0 ? r.p10 / r.finishMed * 365 : 0;
+  let p90a = r.finishMed > 0 ? r.p90 / r.finishMed * 365 : 0;
+  return { netoMesEsperado, p10a, p90a, ingresosMes, costeCicloMes };
+}
+
+function render(results,models,maxEvals,payout,capital){
   document.getElementById('placeholder').style.display='none';
   document.getElementById('resultsArea').classList.remove('result-hidden');
   let best=results[0];
 
+  // Días medios hasta primer retiro = días eval pasa + días primer retiro OK
+  let diasPrimerRetiro = best.dP + best.life.first.DaysIfSuccess;
+  let py = proyAnual(best, payout);
+
   document.getElementById('topMetrics').innerHTML=`
     <div class="metric-card"><div class="metric-val gold">${best.life.name}</div><div class="metric-lbl">Mejor modelo</div></div>
-    <div class="metric-card"><div class="metric-val ${best.netoMed>=0?'green':'red'}">${money(best.netoMed)}</div><div class="metric-lbl">Neto medio</div></div>
-    <div class="metric-card"><div class="metric-val ${best.netoAnual>=0?'green':'red'}">${money(best.netoAnual)}</div><div class="metric-lbl">Neto/año</div></div>
+    <div class="metric-card"><div class="metric-val ${best.netoMed>=0?'green':'red'}">${money(best.netoMed)}</div><div class="metric-lbl">Neto ciclo (medio)</div></div>
+    <div class="metric-card"><div class="metric-val ${best.netoAnual>=0?'green':'red'}">${money(best.netoAnual)}</div><div class="metric-lbl">Neto/año (Monte Carlo)</div></div>
+    <div class="metric-card"><div class="metric-val gold">${money(py.ingresosMes)}</div><div class="metric-lbl">Ingresos/mes esperados</div></div>
+    <div class="metric-card"><div class="metric-val ${best.probProfit>=.5?'green':'red'}">${pctStr(best.probProfit)}</div><div class="metric-lbl">Prob. ciclo positivo</div></div>
     <div class="metric-card"><div class="metric-val">${best.retMes.toFixed(2)}</div><div class="metric-lbl">Retiros/mes</div></div>
-    <div class="metric-card"><div class="metric-val ${best.probProfit>=.5?'green':'red'}">${pctStr(best.probProfit)}</div><div class="metric-lbl">Prob. positivo</div></div>
-    <div class="metric-card"><div class="metric-val">${best.canales}</div><div class="metric-lbl">Canales</div></div>
-    <div class="metric-card"><div class="metric-val">${money(best.riesgo)}</div><div class="metric-lbl">Riesgo/día</div></div>
-    <div class="metric-card"><div class="metric-val ${best.usedPct>=.85?'green':'red'}">${pctStr(best.usedPct)}</div><div class="metric-lbl">Uso presupuesto</div></div>
+    <div class="metric-card"><div class="metric-val">${diasPrimerRetiro.toFixed(0)} días</div><div class="metric-lbl">Días hasta 1er retiro</div></div>
+    <div class="metric-card"><div class="metric-val red">-${money(best.ddP90)}</div><div class="metric-lbl">DD máx. peor 10%</div></div>
   `;
+
+  // Proyección mes a mes (12 meses) — aplica P(ciclo positivo) cada mes
+  // Ingreso esperado real = ingresos_brutos × probProfit (no todos los ciclos generan)
+  // Escenario pesimista P10: solo cobra cuando el ciclo es positivo, con P10 de resultado
+  // Escenario optimista P90: idem con P90
+  let ingresosMedioReal = py.ingresosMes * best.probProfit; // esperanza matemática real
+  let costeMes = py.costeCicloMes;
+
+  // P10 anual por mes: asumimos que en cada mes hay probProfit de ganar p10/finishMed*30, sino 0
+  let ingresoP10mes = (best.p10 > 0 ? best.p10 / Math.max(1,best.finishMed) * 30 : 0) * best.probProfit;
+  let ingresoP90mes = (best.p90 / Math.max(1,best.finishMed) * 30) * best.probProfit;
+
+  let mesesHTML = '';
+  let acumMedio = -best.costeMed;
+  let acumP10   = -best.costeMed;
+  let acumP90   = -best.costeMed;
+
+  for(let mes=1;mes<=12;mes++){
+    acumMedio += ingresosMedioReal - costeMes;
+    acumP10   += ingresoP10mes    - costeMes;
+    acumP90   += ingresoP90mes    - costeMes;
+    let colM = acumMedio >= 0 ? 'var(--green)' : 'var(--red)';
+    let colL  = acumP10   >= 0 ? 'var(--green)' : 'var(--red)';
+    let colH  = acumP90   >= 0 ? 'var(--green)' : 'var(--red)';
+    // Probabilidad de que los X meses acumulados hayan sido todos positivos
+    let probXmeses = Math.pow(best.probProfit, mes) * 100;
+    mesesHTML += `<tr>
+      <td style="color:var(--text-muted)">Mes ${mes}</td>
+      <td style="color:var(--gold)">${money(ingresosMedioReal)}</td>
+      <td style="color:var(--text-muted);font-size:10px">${pctStr(best.probProfit)}</td>
+      <td style="color:${colL}">${money(acumP10)}</td>
+      <td style="color:${colM};font-weight:600">${money(acumMedio)}</td>
+      <td style="color:${colH}">${money(acumP90)}</td>
+      <td style="color:${probXmeses>50?'var(--green)':'var(--amber)'};font-size:10px">${probXmeses.toFixed(1)}%</td>
+    </tr>`;
+  }
 
   document.getElementById('bestTable').innerHTML=`
     <tr><td>Modelo LIFE</td><td>${best.life.name}</td></tr>
     <tr><td>Winrate / Trade</td><td>${pctStr(best.life.wr)} &nbsp; +${money(best.life.win)} / -${money(best.life.loss)}</td></tr>
-    <tr><td>P(1er retiro)</td><td>${pctStr(best.life.first.ProbSuccess)} — días OK ${best.life.first.DaysIfSuccess.toFixed(1)}</td></tr>
-    <tr><td>P(posteriores)</td><td>${pctStr(best.life.later.ProbSuccess)} — días OK ${best.life.later.DaysIfSuccess.toFixed(1)}</td></tr>
+    <tr><td>P(1er retiro)</td><td style="color:var(--green)">${pctStr(best.life.first.ProbSuccess)}</td></tr>
+    <tr><td>Días hasta 1er retiro (si pasa)</td><td style="color:var(--gold)">${diasPrimerRetiro.toFixed(1)} días (eval ${best.dP}d + LIFE ${best.life.first.DaysIfSuccess.toFixed(1)}d)</td></tr>
+    <tr><td>Días si falla 1er retiro</td><td style="color:var(--amber)">${(best.dP + best.life.first.DaysIfFail).toFixed(1)} días</td></tr>
+    <tr><td>P(retiros posteriores)</td><td>${pctStr(best.life.later.ProbSuccess)} — días OK ${best.life.later.DaysIfSuccess.toFixed(1)}</td></tr>
+    <tr><td>Canales / Riesgo/día</td><td>${best.canales} canales · ${money(best.riesgo)}</td></tr>
     <tr><td>Días eval pasa / falla</td><td>${best.dP} / ${best.dF}</td></tr>
     <tr><td>Evaluaciones compradas</td><td>${best.evalsMed.toFixed(1)} de ${maxEvals}</td></tr>
     <tr><td>LIFEs esperadas</td><td>${best.lifesMed.toFixed(1)}</td></tr>
     <tr><td>Retiros esperados</td><td>${best.retMed.toFixed(1)} (${best.retMes.toFixed(2)}/mes)</td></tr>
-    <tr><td>Payouts esperados</td><td>${money(best.paysMed)}</td></tr>
-    <tr><td>P10 / P50 / P90</td><td>${money(best.p10)} / ${money(best.p50)} / ${money(best.p90)}</td></tr>
+    <tr><td>Ingresos brutos/mes</td><td style="color:var(--gold)">${money(py.ingresosMes)}</td></tr>
+    <tr><td>Coste operativo/mes</td><td style="color:var(--amber)">-${money(py.costeCicloMes)}</td></tr>
+    <tr><td>Neto mensual esperado</td><td style="color:${py.netoMesEsperado>=0?'var(--green)':'var(--red)'};font-weight:700">${money(py.netoMesEsperado)}</td></tr>
+    <tr><td>Proyección anual (P10 / Medio / P90)</td><td style="font-size:11px">${money(py.p10a)} / ${money(best.netoAnual)} / ${money(py.p90a)}</td></tr>
+    <tr><td>P10 / P50 / P90 (ciclo)</td><td>${money(best.p10)} / ${money(best.p50)} / ${money(best.p90)}</td></tr>
     <tr><td>Veredicto</td><td class="${vc(best.verdict)}">${best.verdict}</td></tr>
+    <tr style="border-top:2px solid var(--red);"><td colspan="2" style="padding-top:8px;font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px">⚠ Riesgo del sistema</td></tr>
+    <tr><td>DD medio (pico→valle)</td><td style="color:var(--amber)">-${money(best.ddMed)}</td></tr>
+    <tr><td>DD mediano (P50)</td><td style="color:var(--amber)">-${money(best.ddP50)}</td></tr>
+    <tr><td>DD peor 10% (P90)</td><td style="color:var(--red);font-weight:700">-${money(best.ddP90)}</td></tr>
+    <tr><td>Días consecutivos en DD (medio)</td><td style="color:var(--amber)">${best.rachaMed.toFixed(0)} días</td></tr>
+    <tr><td>Días consecutivos en DD (peor 10%)</td><td style="color:var(--red);font-weight:700">${best.rachaP90.toFixed(0)} días</td></tr>
+    <tr><td>Ratio neto/DD (medio)</td><td style="color:${best.netoMed>best.ddMed?'var(--green)':'var(--red)'}">${best.ddMed>0?(best.netoMed/best.ddMed).toFixed(2):'∞'}</td></tr>
   `;
+
+  // Panel proyección mes a mes
+  document.getElementById('proyeccionBody').innerHTML = mesesHTML;
+  let lbl = document.getElementById('probCicloLabel');
+  if(lbl) lbl.textContent = pctStr(1 - best.probProfit) + ' de que el ciclo no genere nada';
+  document.getElementById('proyeccionPanel').style.display = 'block';
+
+  // DD Panel
+  let ddRatio = best.ddMed > 0 ? best.netoMed / best.ddMed : 99;
+  document.getElementById('ddMetrics').innerHTML = `
+    <div class="metric-card"><div class="metric-val amber" style="color:var(--amber)">-${money(best.ddMed)}</div><div class="metric-lbl">DD medio (escenario típico)</div></div>
+    <div class="metric-card"><div class="metric-val red">-${money(best.ddP90)}</div><div class="metric-lbl">DD peor 10% de simulaciones</div></div>
+    <div class="metric-card"><div class="metric-val ${ddRatio>=1?'green':'red'}">${ddRatio.toFixed(2)}</div><div class="metric-lbl">Ratio neto / DD (>1 = viable)</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--amber)">${best.rachaMed.toFixed(0)}d</div><div class="metric-lbl">Días en DD (medio)</div></div>
+    <div class="metric-card"><div class="metric-val red">${best.rachaP90.toFixed(0)}d</div><div class="metric-lbl">Días en DD (peor 10%)</div></div>
+    <div class="metric-card"><div class="metric-val ${best.netoMed>0&&best.ddP90<capital?'green':'red'}">${best.ddP90 < capital ? 'ASUMIBLE' : 'REVISAR'}</div><div class="metric-lbl">DD peor vs capital</div></div>
+  `;
+  document.getElementById('ddPanel').style.display = 'block';
 
   document.getElementById('lifeBody').innerHTML=models.map(m=>`
     <tr>
@@ -815,6 +968,7 @@ function render(results,models,maxEvals){
 
   document.getElementById('topBody').innerHTML=results.slice(0,15).map((r,i)=>{
     let bc=r.netoAnual>=0&&r.usedPct>=.85?'badge-g':(r.usedPct>=.75?'badge-a':'badge-r');
+    let diasPR = (r.dP + r.life.first.DaysIfSuccess).toFixed(0);
     return`<tr>
       <td style="color:var(--text-muted)">${i+1}</td>
       <td style="color:var(--gold);font-weight:700">${r.life.name}</td>
@@ -823,9 +977,12 @@ function render(results,models,maxEvals){
       <td><span class="badge ${bc}">${pctStr(r.usedPct)}</span></td>
       <td>${r.lifesMed.toFixed(1)}</td>
       <td>${r.retMes.toFixed(2)}</td>
+      <td style="color:var(--gold)">${diasPR}d</td>
       <td style="color:${r.netoMed>=0?'var(--green)':'var(--red)'}">${money(r.netoMed)}</td>
       <td style="color:${r.netoAnual>=0?'var(--green)':'var(--red)'}">${money(r.netoAnual)}</td>
       <td>${pctStr(r.probProfit)}</td>
+      <td style="color:var(--amber);font-size:10px">-${money(r.ddMed)}</td>
+      <td style="color:var(--red);font-size:10px">-${money(r.ddP90)}</td>
       <td style="font-size:10px">${money(r.p10)}/${money(r.p50)}/${money(r.p90)}</td>
       <td class="${vc(r.verdict)}">${r.verdict}</td>
     </tr>`;
