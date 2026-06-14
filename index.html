@@ -897,7 +897,6 @@ function render(results,models,maxEvals,payout,capital){
 
   document.getElementById('topMetrics').innerHTML=`
     <div class="metric-card"><div class="metric-val gold">${best.life.name}</div><div class="metric-lbl">Mejor modelo</div></div>
-    <div class="metric-card"><div class="metric-val ${best.netoMed>=0?'green':'red'}">${money(best.netoMed)}</div><div class="metric-lbl">Beneficio medio de la tanda</div></div>
     <div class="metric-card"><div class="metric-val ${best.netoAnual>=0?'green':'red'}">${money(best.netoAnual)}</div><div class="metric-lbl">Proyección anualizada</div></div>
     <div class="metric-card"><div class="metric-val gold">${money(py.ingresosMes)}</div><div class="metric-lbl">Ingresos brutos mensualizados</div></div>
     <div class="metric-card"><div class="metric-val ${best.probProfit>=.5?'green':'red'}">${pctStr(best.probProfit)}</div><div class="metric-lbl">Prob. ciclo positivo</div></div>
@@ -959,9 +958,8 @@ function render(results,models,maxEvals,payout,capital){
     <tr><td>LIFEs esperadas</td><td>${best.lifesMed.toFixed(1)}</td></tr>
     <tr><td>Retiros esperados</td><td>${best.retMed.toFixed(1)} (${best.retMes.toFixed(2)}/mes)</td></tr>
     <tr><td>Payout por retiro usado</td><td style="color:var(--gold)">${money(payout)}</td></tr>
-    <tr><td>Ingresos brutos de la tanda</td><td style="color:var(--gold)">${money(best.paysMed)}</td></tr>
-    <tr><td>Coste evaluaciones de la tanda</td><td style="color:var(--amber)">-${money(best.costeMed)}</td></tr>
-    <tr><td>Beneficio medio de la tanda</td><td style="color:${best.netoMed>=0?'var(--green)':'var(--red)'};font-weight:700">${money(best.netoMed)}</td></tr>
+    <tr><td>Ingresos brutos totales</td><td style="color:var(--gold)">${money(best.paysMed)}</td></tr>
+    <tr><td>Coste total evaluaciones</td><td style="color:var(--amber)">-${money(best.costeMed)}</td></tr>
     <tr><td>Ingresos brutos/mes</td><td style="color:var(--gold)">${money(py.ingresosMes)}</td></tr>
     <tr><td>Coste operativo/mes</td><td style="color:var(--amber)">-${money(py.costeCicloMes)}</td></tr>
     <tr><td>Neto mensual esperado</td><td style="color:${py.netoMesEsperado>=0?'var(--green)':'var(--red)'};font-weight:700">${money(py.netoMesEsperado)}</td></tr>
