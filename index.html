@@ -870,7 +870,11 @@ function render(results,models,maxEvals,payout,capital){
     <div class="metric-card"><div class="metric-val gold">${money(py.ingresosMes)}</div><div class="metric-lbl">Ingresos/mes esperados</div></div>
     <div class="metric-card"><div class="metric-val ${best.probProfit>=.5?'green':'red'}">${pctStr(best.probProfit)}</div><div class="metric-lbl">Prob. ciclo positivo</div></div>
     <div class="metric-card"><div class="metric-val">${best.retMes.toFixed(2)}</div><div class="metric-lbl">Retiros/mes</div></div>
+    <div class="metric-card"><div class="metric-val">${best.canales}</div><div class="metric-lbl">Canales simultáneos</div></div>
+    <div class="metric-card"><div class="metric-val">${money(best.riesgo)}</div><div class="metric-lbl">Riesgo/día</div></div>
     <div class="metric-card"><div class="metric-val">${diasPrimerRetiro.toFixed(0)} días</div><div class="metric-lbl">Días hasta 1er retiro</div></div>
+    <div class="metric-card"><div class="metric-val ${best.usedPct>=.85?'green':'red'}">${pctStr(best.usedPct)}</div><div class="metric-lbl">Uso presupuesto</div></div>
+    <div class="metric-card"><div class="metric-val red">-${money(best.ddMed)}</div><div class="metric-lbl">DD medio del sistema</div></div>
     <div class="metric-card"><div class="metric-val red">-${money(best.ddP90)}</div><div class="metric-lbl">DD máx. peor 10%</div></div>
   `;
 
